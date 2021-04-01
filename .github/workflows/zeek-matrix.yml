@@ -1,0 +1,25 @@
+name: Test & install across Zeek versions
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: test-${{ matrix.zeekver }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        zeekver: [zeek, zeek-lts, zeek-nightly]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ckreibich/action-zkg-install@master
+        with:
+          zeek_version: ${{ matrix.zeekver }}
+          pkg_sysdeps: libnghttp2-dev libbrotli-dev
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: zkg-logs-${{ matrix.zeekver }}
+          path: ${{ github.workspace }}/.action-zkg-install/artifacts
